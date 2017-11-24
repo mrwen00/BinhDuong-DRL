@@ -10,6 +10,8 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<link rel="stylesheet" href="assets/css/main.css" />
+		<link rel="stylesheet" type="text/css" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+		<link rel="stylesheet" type="text/css" href="/bower_components/bootstrap-fileinput/css/fileinput.min.css" media="all" rel="stylesheet" type="text/css">
 	</head>
 	<body>
 
@@ -56,7 +58,23 @@
 										<h3>Maecenas a gravida quam</h3>
 										<p>Etiam posuere hendrerit arcu, ac blandit nulla. Sed congue malesuada nibh, a varius odio vehicula aliquet. Aliquam consequat, nunc quis sollicitudin aliquet, enim magna cursus auctor lacinia nunc ex blandit augue. Ut vitae neque fermentum, luctus elit fermentum, porta augue. Nullam ultricies, turpis at fermentum iaculis, nunc justo dictum dui, non aliquet erat nibh non ex.</p>
 										<p>Sed congue malesuada nibh, a varius odio vehicula aliquet. Aliquam consequat, nunc quis sollicitudin aliquet, enim magna cursus auctor lacinia nunc ex blandit augue. Ut vitae neque fermentum, luctus elit fermentum, porta augue. Nullam ultricies, turpis at fermentum iaculis, nunc justo dictum dui, non aliquet erat nibh non ex. </p>
-										<a href="#" class="button">Learn More</a>
+										<!-- <a href="#" class="button">Learn More</a> -->
+										<form id="my-form"
+        enctype="multipart/form-data"
+        target="hiddenFrame"
+        method="post">
+	 	<input id="file-vi"
+           type="file"
+           name="userPhoto"
+           class="file"/>
+
+	</form>
+
+  <div id="inprocess" style="display: none;">
+	</div>
+
+	<div id="results" >
+	</div>
 									</div>
 								</div>
 						</div>
@@ -128,7 +146,7 @@
 					<p>&copy; Untitled. All rights reserved. Design: <a href="https://templated.co">TEMPLATED</a>. Images: <a href="https://unsplash.com">Unsplash</a>.</p>
 				</div>
 			</footer>
-
+			
 		<!-- Scripts -->
 			<script src="assets/js/jquery.min.js"></script>
 			<script src="assets/js/jquery.scrolly.min.js"></script>
@@ -136,6 +154,159 @@
 			<script src="assets/js/skel.min.js"></script>
 			<script src="assets/js/util.js"></script>
 			<script src="assets/js/main.js"></script>
+			<script src="/bower_components/bootstrap-fileinput/js/plugins/piexif.min.js" type="text/javascript"></script>
+			<script src="/bower_components/bootstrap-fileinput/js/plugins/sortable.min.js" type="text/javascript"></script>
+			<script src="/bower_components/bootstrap-fileinput/js/plugins/purify.min.js" type="text/javascript"></script>
+			<script src="/bower_components/bootstrap-fileinput/js/fileinput.min.js" type="text/javascript"></script>
+			<script src="/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+			<script src="/bower_components/bootstrap-fileinput/themes/explorer/theme.js"></script>
+			<script>
+			  $(document).ready(function() {
+			  	$('.btn').addClass('button');
+			  });
+	 	$('#file-vi').fileinput({
+			uploadUrl: 'http://api.mmlab.uit.edu.vn/api/v1/file/image?method=stream',
+			theme: 'explorer',
+			maxFileCount: 1
+		}).on('fileuploaded', function(event, data, previewId, index) {
+		    var reader = data.reader, response = data.response;
+		    $("<img src='/img/loading.gif' id='loading_img' />").insertAfter("#my-form");
+		    console.log('http://api.mmlab.uit.edu.vn/api/v1/vision/object-detection?fileName=' + response.fileName +
+                  '&fileID=' + response.fileID);
+		  	$.ajax( {
+				url: 'http://api.mmlab.uit.edu.vn/api/v1/vision/object-detection?fileName=' + response.fileName +
+                  '&fileID=' + response.fileID,
+				type: 'GET',
+				success: function(response) {
+							 console.log(response);
+							 $('#loading_img').remove();
+							 $('#inprocess').html('');
+							 $('#inprocess').append('<img src="' + reader.result + '" id="inprocessimg" />');
+							 $('#results').append('<div class=".result"></div>');
 
+							 var nth = 1,
+								   working_div = '#results > div:nth-child(' + nth + ')';
+							 console.log(working_div);
+							 $(working_div).append('<div style="background: url(' + reader.result + '); "><img src="' + reader.result + '" /></div>');
+							 $(working_div).append('<div></div>');
+							 $(working_div + " > div:nth-child(2)").append('<label>Crop</label>');
+							 $(working_div + " > div:nth-child(2)").append('<label>Object</label>');
+							 $(working_div + " > div:nth-child(2)").append('<label>Probability</label>');
+
+               		var result = response.result;
+				       draw_box(working_div, result);
+				       for(var k in result) {
+					       $('#inprocessimg').cropper();
+					       var cropData = { 
+						       "x": result[k].x - result[k].w / 2,
+						       "y": result[k].y - result[k].h / 2,
+						       "height": result[k].h,
+						       "width": result[k].w,
+						       "rotate": 0,
+						       "scaleX": 1,
+						       "scaleY": 1
+					       };
+					       $('#inprocessimg').cropper('setData', cropData);
+
+                 	var crop = $('#inprocessimg').cropper('getCroppedCanvas').toDataURL();
+
+					       $(working_div + " > div:nth-child(2)").append('<div><img src="' + crop + '" /></div> <div>' + result[k].name + '</div> <div>' + result[k].probs + '</div>');
+				       }
+				       $(window).resize(function() {
+					       draw_box(working_div, result);
+				       });
+				},
+				error: function(xhr, status, error) {
+	            	$('#loading_img').remove();
+					alert(xhr.responseText);
+				}
+			});
+		}); 
+
+	 function draw_box(working_div, response) {
+		 $(working_div + " > div:nth-child(1)").contents(':not(img)').remove();
+		 for(var k in response) {
+			 var cropData = { 
+				 "x": response[k].x - response[k].w / 2,
+				 "y": response[k].y - response[k].h / 2,
+				 "height": response[k].h,
+				 "width": response[k].w,
+			 };
+			 var	ratioy = 1 / $(working_div + " > div:nth-child(1) img").get(0).naturalHeight * $(working_div + " > div:nth-child(1) img").height(),
+					  ratiox = 1 / $(working_div + " > div:nth-child(1) img").get(0).naturalWidth * $(working_div + " > div:nth-child(1) img").width(),
+					  position = {
+						  'left': cropData.x * ratiox,
+						  'top': cropData.y * ratioy,
+						  'width': cropData.width  * ratiox,
+						  'height': cropData.height * ratioy
+					  };
+			 $(working_div + " > div:nth-child(1)").append('<div style="top: ' + position.top + 'px; left: ' + position.left + 'px; width: ' + position.width + 'px; height: ' + position.height + 'px"><label>' + response[k].name + '</label></div>');                      
+		 }
+	 }       
+
+	</script>
+
+  <style>
+	 #loading_img {
+		 max-width: 50px;
+		 max-height: 50px;
+		 float: right;
+	 }
+	 #results > div > div:nth-child(1) {
+		 position: relative;
+		 background-size: contain;
+		 background-repeat: no-repeat !important;
+	 }
+	 #results > div > div:nth-child(1) img {
+		 max-width: 100%;
+		 height: auto;
+	 }
+	 #results > div > div:nth-child(1) > div {
+		 position: absolute;
+		 box-shadow: inset 0px 0px 0px 2px rgba(255, 0, 0, 0.3);
+	 }
+	 #results > div > div:nth-child(1) > div:hover {
+		 box-shadow: inset 0px 0px 0px 2px rgba(0, 0, 255, 0.9);
+	 }
+	 #results > div > div:nth-child(1) > div:hover label {
+		 background: rgba(0, 0, 255, 1);
+		 z-index: 99 !important;
+	 }
+	 #results > div > div:nth-child(1) div label {
+		 background: rgba(255, 0, 0, 0.3);
+		 padding: 0px 5px;
+		 color: white;
+	 }
+	 #results > div > div:nth-child(2) {
+		 margin-top: 20px;
+		 display: flex;
+		 flex-flow: row wrap;
+	 }
+	 #results > div > div:nth-child(2) * {
+		 width: 30%;
+		 text-align: center;
+		 margin-bottom: 10px;
+	 }
+	 #my-form > div:nth-child(1) {
+		 margin-bottom: 30px
+	 }
+	 #my-form > div:nth-child(2) {
+		 float: left;
+	 }
+	 #my-form button[type="submit"] {
+		 margin-top: 25px;
+		 float: right;
+	 }
+	 #my-form:after {
+		 content: '.';
+		 visibility: hidden;
+		 clear: both;
+		 display: block;
+	 }
+	 img {
+		 max-width: 100%;
+	 }
+	</style>
+			
 	</body>
 </html>
