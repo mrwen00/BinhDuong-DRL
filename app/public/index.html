@@ -170,7 +170,7 @@
 			maxFileCount: 1
 		}).on('fileuploaded', function(event, data, previewId, index) {
 		    var reader = data.reader, response = data.response;
-		    $("<img src='/img/loading.gif' id='loading_img' />").insertAfter("#my-form");
+		    $("<img src='/images/loading.gif' id='loading_img' />").insertAfter("#my-form");
 		    console.log('http://api.mmlab.uit.edu.vn/api/v1/vision/object-detection?fileName=' + response.fileName +
                   '&fileID=' + response.fileID);
 		  	$.ajax( {
@@ -246,7 +246,7 @@
 
 	</script>
 
-  <style>
+	<style>
 	 #loading_img {
 		 max-width: 50px;
 		 max-height: 50px;
@@ -305,6 +305,9 @@
 	 }
 	 img {
 		 max-width: 100%;
+	 }
+	 .file-caption {
+	 	height: 40px;
 	 }
 	</style>
 			
