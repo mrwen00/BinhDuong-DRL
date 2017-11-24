@@ -188,14 +188,14 @@
 								   working_div = '#results > div:nth-child(' + nth + ')';
 							 console.log(working_div);
 							 $(working_div).append('<div style="background: url(' + reader.result + '); "><img src="' + reader.result + '" /></div>');
-							 $(working_div).append('<div></div>');
+							 /*$(working_div).append('<div></div>');
 							 $(working_div + " > div:nth-child(2)").append('<label>Crop</label>');
 							 $(working_div + " > div:nth-child(2)").append('<label>Object</label>');
-							 $(working_div + " > div:nth-child(2)").append('<label>Probability</label>');
+							 $(working_div + " > div:nth-child(2)").append('<label>Probability</label>');*/
 
                		var result = response.result;
 				       draw_box(working_div, result);
-				       for(var k in result) {
+				       /*for(var k in result) {
 					       $('#inprocessimg').cropper();
 					       var cropData = { 
 						       "x": result[k].x - result[k].w / 2,
@@ -211,7 +211,7 @@
                  	var crop = $('#inprocessimg').cropper('getCroppedCanvas').toDataURL();
 
 					       $(working_div + " > div:nth-child(2)").append('<div><img src="' + crop + '" /></div> <div>' + result[k].name + '</div> <div>' + result[k].probs + '</div>');
-				       }
+				       }*/
 				       $(window).resize(function() {
 					       draw_box(working_div, result);
 				       });
