@@ -1,0 +1,12 @@
+{
+  "name": "submitshapefile",
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "homepage": "",
+  "dependencies": {
+    "bootstrap": "^3.3.7",
+    "bootstrap-fileinput": "^4.4.2",
+    "jquery": "^3.2.1"
+  }
+}
