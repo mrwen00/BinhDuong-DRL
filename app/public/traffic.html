@@ -126,7 +126,10 @@
 	 	$('#file-vi').fileinput({
 			uploadUrl: 'http://api.mmlab.uit.edu.vn/api/v1/file/image?method=stream',
 			theme: 'explorer',
-			maxFileCount: 1
+			maxFileCount: 1,
+			ajaxSettings: {
+				crossDomain: true
+			}
 		}).on('fileuploaded', function(event, data, previewId, index) {
 		    var reader = data.reader, response = data.response;
 		    $("<img src='/images/loading.gif' id='loading_img' />").insertAfter("#my-form");
@@ -265,8 +268,11 @@
 	 img {
 		 max-width: 100%;
 	 }
-	 .file-caption, .file-caption-main {
+	 .file-caption, .file-caption-main, .fileinput-upload+div {
 	 	height: 40px;
+	 }
+	 button {
+	 	background: #3498db !important;
 	 }
 	</style>
 
