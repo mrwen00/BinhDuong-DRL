@@ -195,7 +195,7 @@
 				 "height": response[k].h,
 				 "width": response[k].w,
 			 };
-			 if (result[k].h * result[k].w  / ($(working_div + " > div:nth-child(1) img").height() * $(working_div + " > div:nth-child(1) img").width()) < 0.7) {
+			 if ((response[k].h * response[k].w)  / ($(working_div + " > div:nth-child(1) img").height() * $(working_div + " > div:nth-child(1) img").width()) < 0.7) {
 				 var	ratioy = 1 / $(working_div + " > div:nth-child(1) img").get(0).naturalHeight * $(working_div + " > div:nth-child(1) img").height(),
 						  ratiox = 1 / $(working_div + " > div:nth-child(1) img").get(0).naturalWidth * $(working_div + " > div:nth-child(1) img").width(),
 						  position = {
@@ -205,7 +205,7 @@
 							  'height': cropData.height * ratioy
 						  };
 				 $(working_div + " > div:nth-child(1)").append('<div style="top: ' + position.top + 'px; left: ' + position.left + 'px; width: ' + position.width + 'px; height: ' + position.height + 'px"><label>' + response[k].name + '</label></div>');
-			 }                      
+			}                      
 		 }
 	 }       
 
